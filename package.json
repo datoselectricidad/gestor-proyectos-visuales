@@ -1,0 +1,15 @@
+{
+  "name": "gestor-proyectos-visuales",
+  "version": "1.0.0",
+  "description": "Gestor de proyectos visuales con anotaciones, integrado con GitHub",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.2"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}
