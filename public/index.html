@@ -6,7 +6,6 @@
     <title>Gestor de Proyectos Visuales</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Tu CSS EXACTAMENTE IGUAL (sin cambios) */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -287,13 +286,6 @@
         .btn-delete:hover {
             background-color: #bd2130;
         }
-        .btn-save {
-            background-color: #28a745;
-        }
-        .btn-save:hover {
-            background-color: #218838;
-        }
-        /* Nuevo estilo para botón de GitHub */
         .btn-github {
             background-color: #6f42c1;
         }
@@ -304,58 +296,49 @@
 </head>
 <body>
     <div class="container">
-        <!-- Información del servidor -->
         <div class="server-info">
-            <h3><i class="fas fa-server"></i> Aplicación con GitHub</h3>
-            <p>Los proyectos se guardan y cargan desde tu repositorio de GitHub</p>
+            <h3><i class="fas fa-server"></i> Gestor con GitHub</h3>
+            <p>Proyectos y anotaciones se guardan automáticamente en tu repositorio</p>
             <div id="api-status">
-                <p><span class="status-indicator status-ready"></span> Estado: Conectado a GitHub</p>
+                <p><span class="status-indicator status-ready"></span> Estado: Conectado</p>
             </div>
         </div>
-        <!-- Pantalla Principal -->
         <div class="screen active" id="main-screen">
             <header>
                 <h1>Gestor de Proyectos Visuales</h1>
-                <p class="subtitle">Crea y gestiona proyectos con anotaciones visuales</p>
+                <p class="subtitle">Crea proyectos con anotaciones individuales</p>
             </header>
             <div class="button-grid">
                 <div class="app-button" onclick="showScreen('load-project-screen')">
                     <i class="fas fa-folder-open"></i>
                     <h3>Abrir Proyecto</h3>
-                    <p>Carga un proyecto desde GitHub</p>
+                    <p>Carga desde GitHub</p>
                 </div>
                 <div class="app-button" onclick="showScreen('create-project-screen')">
                     <i class="fas fa-plus-circle"></i>
                     <h3>Crear Proyecto</h3>
-                    <p>Inicia un nuevo proyecto con imagen</p>
+                    <p>Nuevo proyecto con imagen</p>
                 </div>
                 <div class="app-button" onclick="exitApp()">
                     <i class="fas fa-door-open"></i>
                     <h3>Salir</h3>
-                    <p>Cierra la aplicación</p>
+                    <p>Cerrar aplicación</p>
                 </div>
             </div>
-            <div class="instructions">
-                <h3><i class="fas fa-info-circle"></i> Instrucciones</h3>
-                <p>Tus proyectos se guardan automáticamente en tu repositorio de GitHub.</p>
-            </div>
         </div>
-        <!-- Pantalla de Cargar Proyecto ACTUALIZADA -->
         <div class="screen" id="load-project-screen">
-            <h2>Cargar un proyecto desde GitHub</h2>
+            <h2>Cargar proyecto desde GitHub</h2>
             <div id="project-list" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                <p>Cargando lista de proyectos...</p>
+                <p>Cargando...</p>
             </div>
-            <button onclick="loadProjectList()"><i class="fas fa-sync"></i> Actualizar lista</button>
+            <button onclick="loadProjectList()"><i class="fas fa-sync"></i> Actualizar</button>
             <button onclick="showScreen('main-screen')"><i class="fas fa-arrow-left"></i> Volver</button>
         </div>
-        <!-- Pantalla de Crear Proyecto (sin cambios) -->
         <div class="screen" id="create-project-screen">
             <h2>Crear Nuevo Proyecto</h2>
             <div class="form-group">
                 <label for="project-name">Nombre del Proyecto <span class="required">*</span></label>
                 <input type="text" id="project-name" required>
-                <div class="error" id="project-name-error"></div>
             </div>
             <div class="form-group">
                 <label for="project-description">Descripción</label>
@@ -364,36 +347,32 @@
             <div class="form-group">
                 <label for="project-file">Seleccionar imagen <span class="required">*</span></label>
                 <input type="file" id="project-file" accept=".jpg,.jpeg,.png" required>
-                <div class="error" id="project-file-error"></div>
             </div>
             <button onclick="createProject()"><i class="fas fa-check"></i> Crear Proyecto</button>
             <button onclick="showScreen('main-screen')"><i class="fas fa-times"></i> Cancelar</button>
         </div>
-        <!-- Pantalla de Visualización de Proyecto (botón de guardar actualizado) -->
         <div class="screen" id="project-view-screen">
             <h2>Proyecto: <span id="project-title"></span></h2>
             <div class="image-container" id="image-container">
                 <img id="project-image" src="" alt="Imagen del proyecto">
                 <div id="annotation-overlay"></div>
             </div>
-            <p class="help-text">Haz doble clic en cualquier lugar de la imagen para añadir una anotación</p>
+            <p class="help-text">Doble clic en la imagen para añadir anotación</p>
             <div class="page-controls">
                 <button onclick="exitProject()"><i class="fas fa-arrow-left"></i> Salir</button>
-                <!-- BOTÓN ACTUALIZADO: Guardar en GitHub -->
                 <button class="btn-github" onclick="saveProjectToGitHub()"><i class="fab fa-github"></i> Guardar en GitHub</button>
                 <button class="btn-delete" onclick="deleteCurrentProject()"><i class="fas fa-trash"></i> Borrar Proyecto</button>
             </div>
         </div>
-        <!-- Pantalla de Crear/Editar Anotación (sin cambios) -->
         <div class="screen" id="annotation-screen">
             <h2 id="annotation-header">Crear Anotación</h2>
             <div class="form-group">
                 <label for="annotation-title">Título (opcional)</label>
-                <input type="text" id="annotation-title" maxlength="100" placeholder="Título de la anotación">
+                <input type="text" id="annotation-title" maxlength="100">
             </div>
             <div class="form-group">
                 <label for="annotation-description">Descripción (opcional)</label>
-                <textarea id="annotation-description" maxlength="500" placeholder="Describe tu anotación aquí..."></textarea>
+                <textarea id="annotation-description" maxlength="500"></textarea>
             </div>
             <div class="form-group">
                 <label>Fotos adjuntas</label>
@@ -407,7 +386,6 @@
             <button onclick="cancelAnnotation()"><i class="fas fa-times"></i> Cancelar</button>
             <button onclick="saveAnnotation()"><i class="fas fa-check"></i> Guardar Anotación</button>
         </div>
-        <!-- Pantalla de Ver Anotación (sin cambios) -->
         <div class="screen" id="view-annotation-screen">
             <h2>Anotación</h2>
             <div class="form-group">
@@ -429,13 +407,9 @@
     </div>
 
     <script>
-        // Estado global
         let currentProject = null;
         let currentAnnotation = null;
         let originalImageSize = {width: 0, height: 0};
-
-        // URL base de tu backend en Vercel
-        const BACKEND_URL = "https://gestor-proyectos-backend.vercel.app";
 
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
@@ -450,8 +424,7 @@
                         const hasCamera = devices.some(device => device.kind === 'videoinput');
                         cameraButton.style.display = hasCamera ? 'inline-block' : 'none';
                     })
-                    .catch(err => {
-                        console.error('Error al verificar dispositivos:', err);
+                    .catch(() => {
                         cameraButton.style.display = 'none';
                     });
             } else {
@@ -482,15 +455,12 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
-            
-            // Cargar lista de proyectos al entrar a la pantalla de carga
             if (screenId === 'load-project-screen') {
                 setTimeout(loadProjectList, 300);
             }
         }
 
-        // === FUNCIONES DE INTEGRACIÓN CON GITHUB ===
-
+        // === NUEVAS FUNCIONES PARA GITHUB ===
         async function saveProjectToGitHub() {
             if (!currentProject || !currentProject.name) {
                 showNotification('El proyecto debe tener un nombre', 'error');
@@ -502,20 +472,28 @@
             saveBtn.disabled = true;
 
             try {
-                const response = await fetch(`${BACKEND_URL}/api/save-project`, {
+                const payload = {
+                    name: currentProject.name,
+                    description: currentProject.description || '',
+                    imageData: currentProject.imageData,
+                    annotations: currentProject.annotations || []
+                };
+
+                const response = await fetch('/api/save-project', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(currentProject)
+                    body: JSON.stringify(payload)
                 });
+
                 const result = await response.json();
                 if (response.ok) {
-                    showNotification('✅ Proyecto guardado en GitHub', 'success');
+                    showNotification('✅ Proyecto y anotaciones guardados en GitHub', 'success');
                 } else {
                     throw new Error(result.error || 'Error desconocido');
                 }
             } catch (error) {
-                console.error('Error al guardar en GitHub:', error);
-                showNotification('❌ Error: ' + error.message, 'error');
+                console.error('Error al guardar:', error);
+                showNotification('❌ ' + error.message, 'error');
             } finally {
                 saveBtn.innerHTML = originalHTML;
                 saveBtn.disabled = false;
@@ -524,53 +502,36 @@
 
         async function loadProjectList() {
             const listDiv = document.getElementById('project-list');
-            listDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando proyectos desde GitHub...</p>';
+            listDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando...</p>';
             try {
-                const response = await fetch(`${BACKEND_URL}/api/list-projects`);
-                if (!response.ok) throw new Error('No se pudo conectar al servidor');
+                const response = await fetch('/api/list-projects');
                 const { projects } = await response.json();
                 if (projects.length === 0) {
-                    listDiv.innerHTML = '<p>📭 No hay proyectos guardados en GitHub.</p>';
+                    listDiv.innerHTML = '<p>📭 No hay proyectos.</p>';
                     return;
                 }
-                listDiv.innerHTML = '<h3>Proyectos disponibles:</h3>' + 
+                listDiv.innerHTML = '<h3>Proyectos:</h3>' + 
                     projects.map(p => 
-                        `<div style="margin:12px 0; padding:12px; border:1px solid #e0e0e0; border-radius:8px; background:white;">
-                            <strong>${decodeProjectName(p.name)}</strong><br>
-                            <small>${formatBytes(p.size)}</small><br>
-                            <button onclick="loadProjectFromGitHub('${p.name}')" style="margin-top:8px; background:#4b6cb7; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">
+                        `<div style="margin:12px 0; padding:12px; border:1px solid #e0e0e0; border-radius:8px;">
+                            <strong>${p.name}</strong><br>
+                            <button onclick="loadProjectFromGitHub('${p.encodedName}')" style="margin-top:8px; background:#4b6cb7; color:white; border:none; padding:6px 12px; border-radius:4px;">
                                 <i class="fas fa-folder-open"></i> Abrir
                             </button>
                         </div>`
                     ).join('');
             } catch (error) {
-                console.error('Error al cargar lista:', error);
                 listDiv.innerHTML = `<p>⚠️ Error: ${error.message}</p>`;
-                showNotification('Error al cargar lista de proyectos', 'error');
+                showNotification('Error al cargar proyectos', 'error');
             }
-        }
-
-        function decodeProjectName(encodedName) {
-            return encodedName.replace(/_/g, ' ');
-        }
-
-        function formatBytes(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-            else return (bytes / 1048576).toFixed(1) + ' MB';
         }
 
         async function loadProjectFromGitHub(encodedName) {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/get-project?name=${encodeURIComponent(encodedName)}`);
-                if (!response.ok) {
-                    const err = await response.json().catch(() => ({}));
-                    throw new Error(err.error || 'Proyecto no encontrado');
-                }
+                const response = await fetch(`/api/get-project?name=${encodeURIComponent(encodedName)}`);
                 const projectData = await response.json();
                 currentProject = {
                     ...projectData,
-                    name: decodeProjectName(encodedName)
+                    name: encodedName.replace(/_/g, ' ')
                 };
                 document.getElementById('project-title').textContent = currentProject.name;
                 document.getElementById('project-image').src = currentProject.imageData;
@@ -580,21 +541,17 @@
                     originalImageSize.height = this.naturalHeight;
                     renderAnnotations();
                 };
-                showNotification('✅ Proyecto cargado desde GitHub', 'success');
+                showNotification('✅ Proyecto cargado', 'success');
             } catch (error) {
-                console.error('Error al cargar proyecto:', error);
                 showNotification('❌ Error al cargar: ' + error.message, 'error');
             }
         }
 
-        // === RESTO DE TUS FUNCIONES (SIN CAMBIOS) ===
-
+        // === RESTO DE FUNCIONES (sin cambios esenciales) ===
         function renderAnnotations() {
             const overlay = document.getElementById('annotation-overlay');
             overlay.innerHTML = '';
-            if (!currentProject || !currentProject.annotations || currentProject.annotations.length === 0) {
-                return;
-            }
+            if (!currentProject || !currentProject.annotations || currentProject.annotations.length === 0) return;
             const container = document.getElementById('image-container');
             const img = document.getElementById('project-image');
             if (!container || !img) return;
@@ -605,21 +562,14 @@
             currentProject.annotations.forEach(annotation => {
                 const x = offsetX + (annotation.relativeX / originalImageSize.width) * imgRect.width;
                 const y = offsetY + (annotation.relativeY / originalImageSize.height) * imgRect.height;
-                if (isNaN(x) || isNaN(y)) {
-                    console.error('Coordenadas inválidas para anotación:', annotation);
-                    return;
-                }
+                if (isNaN(x) || isNaN(y)) return;
                 const marker = document.createElement('div');
                 marker.className = 'annotation-marker';
                 marker.style.left = `${x}px`;
                 marker.style.top = `${y}px`;
                 marker.dataset.id = annotation.id;
-                if (annotation.title) {
-                    marker.title = annotation.title;
-                }
-                marker.addEventListener('click', function() {
-                    viewAnnotation(annotation.id);
-                });
+                if (annotation.title) marker.title = annotation.title;
+                marker.addEventListener('click', () => viewAnnotation(annotation.id));
                 overlay.appendChild(marker);
             });
         }
@@ -634,9 +584,7 @@
             const offsetY = (containerRect.height - imgRect.height) / 2;
             const clickX = e.clientX - containerRect.left - offsetX;
             const clickY = e.clientY - containerRect.top - offsetY;
-            if (clickX < 0 || clickY < 0 || clickX > imgRect.width || clickY > imgRect.height) {
-                return;
-            }
+            if (clickX < 0 || clickY < 0 || clickX > imgRect.width || clickY > imgRect.height) return;
             const relativeX = (clickX / imgRect.width) * originalImageSize.width;
             const relativeY = (clickY / imgRect.height) * originalImageSize.height;
             createNewAnnotation(relativeX, relativeY);
@@ -664,12 +612,9 @@
             const file = e.target.files[0];
             const reader = new FileReader();
             reader.onload = function(event) {
-                const photoData = event.target.result;
                 if (currentAnnotation) {
-                    if (!currentAnnotation.photos) {
-                        currentAnnotation.photos = [];
-                    }
-                    currentAnnotation.photos.push(photoData);
+                    if (!currentAnnotation.photos) currentAnnotation.photos = [];
+                    currentAnnotation.photos.push(event.target.result);
                     renderAnnotationPhotos();
                 }
             };
@@ -679,25 +624,16 @@
         function renderAnnotationPhotos() {
             const photosContainer = document.getElementById('annotation-photos');
             photosContainer.innerHTML = '';
-            if (currentAnnotation && currentAnnotation.photos && currentAnnotation.photos.length > 0) {
+            if (currentAnnotation && currentAnnotation.photos) {
                 currentAnnotation.photos.forEach((photo, index) => {
                     const photoItem = document.createElement('div');
                     photoItem.className = 'photo-item';
                     const img = document.createElement('img');
                     img.src = photo;
-                    img.alt = `Foto ${index + 1}`;
                     const deleteBtn = document.createElement('button');
                     deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
-                    deleteBtn.style.position = 'absolute';
-                    deleteBtn.style.top = '0';
-                    deleteBtn.style.right = '0';
-                    deleteBtn.style.padding = '2px 5px';
-                    deleteBtn.style.fontSize = '10px';
-                    deleteBtn.style.background = 'rgba(255,0,0,0.7)';
-                    deleteBtn.style.color = 'white';
-                    deleteBtn.style.border = 'none';
-                    deleteBtn.style.borderRadius = '50%';
-                    deleteBtn.onclick = function(event) {
+                    deleteBtn.style.cssText = 'position:absolute;top:0;right:0;padding:2px 5px;font-size:10px;background:rgba(255,0,0,0.7);color:white;border:none;border-radius:50%;';
+                    deleteBtn.onclick = (event) => {
                         event.stopPropagation();
                         currentAnnotation.photos.splice(index, 1);
                         renderAnnotationPhotos();
@@ -713,9 +649,7 @@
             if (!currentProject || !currentAnnotation) return;
             const title = document.getElementById('annotation-title').value;
             const description = document.getElementById('annotation-description').value;
-            if (!currentProject.annotations) {
-                currentProject.annotations = [];
-            }
+            if (!currentProject.annotations) currentProject.annotations = [];
             const existingIndex = currentProject.annotations.findIndex(a => a.id === currentAnnotation.id);
             if (existingIndex >= 0) {
                 currentProject.annotations[existingIndex] = {
@@ -731,10 +665,7 @@
                     description: description
                 });
             }
-            document.getElementById('annotation-title').value = '';
-            document.getElementById('annotation-description').value = '';
-            document.getElementById('annotation-photos').innerHTML = '';
-            showScreen('project-view-screen');
+            cancelAnnotation();
             renderAnnotations();
             showNotification('Anotación guardada', 'success');
         }
@@ -753,12 +684,11 @@
                     photoItem.className = 'photo-item';
                     const img = document.createElement('img');
                     img.src = photo;
-                    img.alt = 'Foto de anotación';
                     photoItem.appendChild(img);
                     photosContainer.appendChild(photoItem);
                 });
             } else {
-                photosContainer.innerHTML = '<p>No hay fotos adjuntas</p>';
+                photosContainer.innerHTML = '<p>No hay fotos</p>';
             }
             currentAnnotation = annotation;
             showScreen('view-annotation-screen');
@@ -796,11 +726,11 @@
             const descriptionInput = document.getElementById('project-description');
             const fileInput = document.getElementById('project-file');
             if (!nameInput.value.trim()) {
-                showNotification('Por favor, ingresa un nombre para el proyecto', 'error');
+                showNotification('Ingresa un nombre', 'error');
                 return;
             }
             if (!fileInput.files || fileInput.files.length === 0) {
-                showNotification('Por favor, selecciona una imagen para el proyecto', 'error');
+                showNotification('Selecciona una imagen', 'error');
                 return;
             }
             const file = fileInput.files[0];
@@ -817,22 +747,17 @@
                 nameInput.value = '';
                 descriptionInput.value = '';
                 fileInput.value = '';
-                showNotification('Proyecto creado. ¡Recuerda guardarlo en GitHub!', 'success');
+                showNotification('Proyecto creado. ¡Guarda en GitHub!', 'success');
                 document.getElementById('project-title').textContent = currentProject.name;
-                const projectImage = document.getElementById('project-image');
-                projectImage.src = currentProject.imageData;
+                document.getElementById('project-image').src = currentProject.imageData;
                 showScreen('project-view-screen');
-                projectImage.onload = function() {
-                    originalImageSize.width = this.naturalWidth;
-                    originalImageSize.height = this.naturalHeight;
-                };
             };
             reader.readAsDataURL(file);
         }
 
         function openCamera() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showNotification('Tu dispositivo no soporta el uso de la cámara', 'error');
+                showNotification('Cámara no soportada', 'error');
                 return;
             }
             const cameraInput = document.createElement('input');
@@ -841,9 +766,7 @@
             cameraInput.capture = 'environment';
             cameraInput.style.display = 'none';
             cameraInput.onchange = function(e) {
-                if (e.target.files.length > 0) {
-                    addPhotoFromFile(e);
-                }
+                if (e.target.files.length > 0) addPhotoFromFile(e);
                 document.body.removeChild(cameraInput);
             };
             document.body.appendChild(cameraInput);
@@ -852,10 +775,10 @@
 
         function deleteCurrentProject() {
             if (!currentProject) {
-                showNotification('No hay proyecto para borrar', 'error');
+                showNotification('No hay proyecto', 'error');
                 return;
             }
-            if (confirm(`¿Estás seguro de que quieres borrar el proyecto "${currentProject.name}"? Esta acción no se puede deshacer.`)) {
+            if (confirm(`¿Borrar "${currentProject.name}"?`)) {
                 currentProject = null;
                 currentAnnotation = null;
                 showScreen('main-screen');
@@ -867,16 +790,16 @@
             currentProject = null;
             currentAnnotation = null;
             showScreen('main-screen');
-            showNotification('Proyecto cerrado. Los cambios no se guardaron.', 'info');
+            showNotification('Proyecto cerrado', 'info');
         }
 
         function exitApp() {
-            if (confirm('¿Estás seguro de que quieres salir? Se perderán todos los cambios no guardados.')) {
+            if (confirm('¿Salir? Los cambios no guardados se perderán.')) {
                 currentProject = null;
                 currentAnnotation = null;
                 showNotification('Aplicación cerrada', 'info');
                 setTimeout(() => {
-                    document.body.innerHTML = '<div style="text-align:center;padding:50px;font-size:24px;">Aplicación cerrada. Puedes cerrar esta pestaña.</div>';
+                    document.body.innerHTML = '<div style="text-align:center;padding:50px;font-size:24px;">Aplicación cerrada.</div>';
                 }, 1500);
             }
         }
@@ -888,9 +811,7 @@
             notification.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
             document.body.appendChild(notification);
             setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
+                if (notification.parentNode) notification.parentNode.removeChild(notification);
             }, 3000);
         }
     </script>
