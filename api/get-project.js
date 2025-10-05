@@ -2,7 +2,7 @@ const { Octokit } = require("@octokit/rest");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OWNER = "datoselectricidad";
-const REPO = "anotaciones";
+const REPO = "gestor-proyectos-visuales";
 const FOLDER = "proyectos";
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
