@@ -9,6 +9,9 @@ const BASE_PATH = "proyectos";
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
+/**
+ * Obtiene el SHA de un archivo si existe, o null si no existe.
+ */
 async function getFileSha(path) {
   try {
     const { data } = await octokit.rest.repos.getContent({
@@ -18,28 +21,39 @@ async function getFileSha(path) {
       ref: BRANCH,
     });
     return data.sha;
-  } catch (e) {
-    return null; // archivo no existe
+  } catch (error) {
+    // Si el archivo no existe, GitHub devuelve 404
+    if (error.status === 404) {
+      return null;
+    }
+    // Otros errores (token inválido, etc.) se lanzan
+    throw error;
   }
 }
 
 module.exports = async (req, res) => {
+  // Solo permitir método POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
   try {
+    // Parsear cuerpo de la solicitud
     const body = JSON.parse(req.body);
     const { name, description = "", imageData, annotations = [] } = body;
-    if (!name) return res.status(400).json({ error: "Nombre del proyecto requerido" });
 
-    const safeName = name.replace(/[^a-z0-9-_]/gi, "_").toLowerCase();
+    // Validar nombre del proyecto
+    if (!name || typeof name !== "string" || name.trim() === "") {
+      return res.status(400).json({ error: "El nombre del proyecto es requerido" });
+    }
+
+    // Sanitizar nombre para usarlo como carpeta (solo letras, números, guiones y guiones bajos)
+    const safeName = name.trim().replace(/[^a-z0-9-_]/gi, "_").toLowerCase();
     const projectPath = `${BASE_PATH}/${safeName}`;
 
-    // Guardar info del proyecto
-    const infoContent = Buffer.from(
-      JSON.stringify({ name, description, imageData }, null, 2)
-    ).toString("base64");
+    // === 1. Guardar metadatos del proyecto ===
+    const projectInfo = { name: name.trim(), description, imageData };
+    const infoContent = Buffer.from(JSON.stringify(projectInfo, null, 2)).toString("base64");
     const infoPath = `${projectPath}/info.json`;
     const infoSha = await getFileSha(infoPath);
 
@@ -50,28 +64,51 @@ module.exports = async (req, res) => {
       message: `Guardar proyecto: ${name}`,
       content: infoContent,
       branch: BRANCH,
-      sha: infoSha,
+      sha: infoSha, // null si es nuevo
     });
 
-    // Guardar cada anotación
+    // === 2. Guardar cada anotación como archivo individual ===
     for (const ann of annotations) {
+      if (!ann || typeof ann.id !== "number") continue; // saltar anotaciones inválidas
+
       const annPath = `${projectPath}/anotacion_${ann.id}.json`;
       const annContent = Buffer.from(JSON.stringify(ann, null, 2)).toString("base64");
       const annSha = await getFileSha(annPath);
+
       await octokit.rest.repos.createOrUpdateFileContents({
         owner: OWNER,
         repo: REPO,
         path: annPath,
-        message: `Anotación ${ann.id} en ${name}`,
+        message: `Anotación ${ann.id} en proyecto "${name}"`,
         content: annContent,
         branch: BRANCH,
         sha: annSha,
       });
     }
 
-    res.status(200).json({ success: true, projectName: safeName });
+    // === Respuesta exitosa ===
+    res.status(200).json({
+      success: true,
+      message: "Proyecto y anotaciones guardados correctamente en GitHub",
+      projectName: safeName,
+    });
+
   } catch (error) {
     console.error("Error en save-project:", error);
-    res.status(500).json({ error: "Error al guardar en GitHub", details: error.message });
+
+    // Devolver siempre JSON, incluso en errores
+    let errorMessage = "Error interno al guardar en GitHub";
+    if (error.status === 401 || error.status === 403) {
+      errorMessage = "Token de GitHub inválido o sin permisos (requiere 'public_repo')";
+    } else if (error.status === 404) {
+      errorMessage = "Repositorio no encontrado o no accesible";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).json({
+      error: errorMessage,
+      details: process.env.NODE_ENV === "development" ? error : undefined,
+    });
   }
 };
