@@ -1,4 +1,3 @@
-// api/list-projects.js
 const { Octokit } = require("@octokit/rest");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -8,9 +7,12 @@ const BASE_PATH = "proyectos";
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-module.exports = async (req, res) => {
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Método no permitido" });
+exports.handler = async (event, context) => {
+  if (event.httpMethod !== "GET") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Método no permitido" })
+    };
   }
 
   try {
@@ -21,21 +23,27 @@ module.exports = async (req, res) => {
     });
 
     const projects = Array.isArray(data)
-      ? data
-          .filter(item => item.type === "dir")
-          .map(dir => ({
-            name: dir.name.replace(/_/g, " "),
-            encodedName: dir.name,
-          }))
+      ? data.filter(item => item.type === "dir").map(dir => ({
+          name: dir.name.replace(/_/g, " "),
+          encodedName: dir.name,
+        }))
       : [];
 
-    res.status(200).json({ projects });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ projects })
+    };
   } catch (error) {
-    // Manejo explícito de 404: carpeta 'proyectos' no existe
     if (error.status === 404) {
-      return res.status(200).json({ projects: [] });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ projects: [] })
+      };
     }
     console.error("Error en list-projects:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Error al listar proyectos" })
+    };
   }
 };

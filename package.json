@@ -1,6 +1,8 @@
 {
   "name": "gestor-proyectos-visuales",
   "version": "1.0.0",
+  "description": "Gestor de proyectos visuales con anotaciones individuales en GitHub",
+  "main": "index.js",
   "dependencies": {
     "@octokit/rest": "^20.0.2"
   }
