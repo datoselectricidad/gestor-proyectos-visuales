@@ -6,6 +6,7 @@
     <title>Gestor de Proyectos Visuales</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Tu CSS EXACTAMENTE IGUAL (sin cambios) */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -295,6 +296,7 @@
     </style>
 </head>
 <body>
+    <!-- TODO TU HTML IGUAL HASTA LAS PANTALLAS -->
     <div class="container">
         <div class="server-info">
             <h3><i class="fas fa-server"></i> Gestor con GitHub</h3>
@@ -407,10 +409,12 @@
     </div>
 
     <script>
+        // === CONFIGURACIÓN GLOBAL ===
         let currentProject = null;
         let currentAnnotation = null;
         let originalImageSize = {width: 0, height: 0};
 
+        // === FUNCIONES PRINCIPALES ===
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
             checkMobileFeatures();
@@ -460,7 +464,7 @@
             }
         }
 
-        // === NUEVAS FUNCIONES PARA GITHUB ===
+        // === FUNCIONES PARA NETLIFY ===
         async function saveProjectToGitHub() {
             if (!currentProject || !currentProject.name) {
                 showNotification('El proyecto debe tener un nombre', 'error');
@@ -479,7 +483,8 @@
                     annotations: currentProject.annotations || []
                 };
 
-                const response = await fetch('/api/save-project', {
+                // 🔁 RUTA ACTUALIZADA PARA NETLIFY
+                const response = await fetch('/.netlify/functions/save-project', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -504,7 +509,8 @@
             const listDiv = document.getElementById('project-list');
             listDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando...</p>';
             try {
-                const response = await fetch('/api/list-projects');
+                // 🔁 RUTA ACTUALIZADA PARA NETLIFY
+                const response = await fetch('/.netlify/functions/list-projects');
                 const { projects } = await response.json();
                 if (projects.length === 0) {
                     listDiv.innerHTML = '<p>📭 No hay proyectos.</p>';
@@ -527,7 +533,8 @@
 
         async function loadProjectFromGitHub(encodedName) {
             try {
-                const response = await fetch(`/api/get-project?name=${encodeURIComponent(encodedName)}`);
+                // 🔁 RUTA ACTUALIZADA PARA NETLIFY
+                const response = await fetch(`/.netlify/functions/get-project?name=${encodeURIComponent(encodedName)}`);
                 const projectData = await response.json();
                 currentProject = {
                     ...projectData,
@@ -547,7 +554,11 @@
             }
         }
 
-        // === RESTO DE FUNCIONES (sin cambios esenciales) ===
+        // === RESTO DE TUS FUNCIONES (SIN CAMBIOS) ===
+        // ... (renderAnnotations, handleImageDoubleClick, createNewAnnotation, etc.)
+        // (Mantén todo el resto de tu código JS exactamente igual)
+
+        // === FUNCIONES AUXILIARES ===
         function renderAnnotations() {
             const overlay = document.getElementById('annotation-overlay');
             overlay.innerHTML = '';
