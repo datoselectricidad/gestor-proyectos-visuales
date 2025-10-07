@@ -482,26 +482,30 @@
         }
 
         async function loadProjectFromGitHub(encodedName) {
-            try {
-                const response = await fetch(`/.netlify/functions/get-project?name=${encodeURIComponent(encodedName)}`);
-                const projectData = await response.json();
-                currentProject = {
-                    ...projectData,
-                    name: encodedName.replace(/_/g, ' ')
-                };
-                document.getElementById('project-title').textContent = currentProject.name;
-                document.getElementById('project-image').src = currentProject.imageData;
-                showScreen('project-view-screen');
-                document.getElementById('project-image').onload = function() {
-                    originalImageSize.width = this.naturalWidth;
-                    originalImageSize.height = this.naturalHeight;
-                    renderAnnotations();
-                };
-                showNotification('✅ Proyecto cargado', 'success');
-            } catch (error) {
-                showNotification('❌ Error al cargar: ' + error.message, 'error');
-            }
-        }
+  try {
+    const response = await fetch(`/.netlify/functions/get-project?name=${encodeURIComponent(encodedName)}`);
+    const projectData = await response.json();
+    currentProject = {
+      ...projectData,
+      name: encodedName.replace(/_/g, ' ')
+    };
+    document.getElementById('project-title').textContent = currentProject.name;
+
+    // ✅ Corregido: define onload ANTES de asignar src
+    const img = document.getElementById('project-image');
+    img.onload = function() {
+      originalImageSize.width = this.naturalWidth;
+      originalImageSize.height = this.naturalHeight;
+      renderAnnotations();
+    };
+    img.src = currentProject.imageData;
+
+    showScreen('project-view-screen');
+    showNotification('✅ Proyecto cargado', 'success');
+  } catch (error) {
+    showNotification('❌ Error al cargar: ' + error.message, 'error');
+  }
+}
 
         function renderAnnotations() {
             const overlay = document.getElementById('annotation-overlay');

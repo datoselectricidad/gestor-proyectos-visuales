@@ -1,3 +1,4 @@
+// netlify/functions/get-project.js
 const { Octokit } = require("@octokit/rest");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -11,6 +12,7 @@ exports.handler = async (event, context) => {
   if (event.httpMethod !== "GET") {
     return {
       statusCode: 405,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: "Método no permitido" })
     };
   }
@@ -19,33 +21,50 @@ exports.handler = async (event, context) => {
   if (!name) {
     return {
       statusCode: 400,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: "Nombre del proyecto requerido" })
     };
   }
 
-  const safeName = name.replace(/[^a-z0-9-_]/gi, "_").toLowerCase();
+  // Sanitizar nombre (igual que en save-project.js)
+  const safeName = name.trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s_-]/gi, "")
+    .replace(/\s+/g, "_")
+    .toLowerCase();
+
+  if (safeName === "") {
+    return {
+      statusCode: 400,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Nombre del proyecto no válido" })
+    };
+  }
+
   const projectPath = `${BASE_PATH}/${safeName}`;
 
   try {
-    // Cargar info del proyecto
-    const { data: infoData } = await octokit.rest.repos.getContent({
+    // 1. Cargar info del proyecto
+    const {  infoData } = await octokit.rest.repos.getContent({
       owner: OWNER,
       repo: REPO,
       path: `${projectPath}/info.json`,
     });
     const projectInfo = JSON.parse(Buffer.from(infoData.content, "base64").toString("utf8"));
 
-    // Listar anotaciones
+    // 2. Listar contenido de la carpeta del proyecto
     const { data: files } = await octokit.rest.repos.getContent({
       owner: OWNER,
       repo: REPO,
       path: projectPath,
     });
 
+    // 3. Cargar solo anotaciones
     const annotations = [];
     for (const file of files) {
-      if (file.name.startsWith("anotacion_") && file.name.endsWith(".json")) {
-        const { data: annData } = await octokit.rest.repos.getContent({
+      if (file.type === "file" && file.name.startsWith("anotacion_") && file.name.endsWith(".json")) {
+        const {  annData } = await octokit.rest.repos.getContent({
           owner: OWNER,
           repo: REPO,
           path: file.path,
@@ -57,6 +76,7 @@ exports.handler = async (event, context) => {
 
     return {
       statusCode: 200,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: projectInfo.name,
         description: projectInfo.description || '',
@@ -64,17 +84,29 @@ exports.handler = async (event, context) => {
         annotations: annotations
       })
     };
+
   } catch (error) {
+    console.error("Error en get-project:", error);
+
     if (error.status === 404) {
       return {
         statusCode: 404,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ error: "Proyecto no encontrado" })
       };
     }
-    console.error("Error en get-project:", error);
+
+    let msg = "Error interno al cargar el proyecto";
+    if (error.status === 403) {
+      msg = "Token de GitHub sin permisos (requiere 'public_repo')";
+    } else if (error.message) {
+      msg = error.message;
+    }
+
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Error al cargar el proyecto" })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: msg })
     };
   }
 };
