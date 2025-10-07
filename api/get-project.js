@@ -1,4 +1,3 @@
-// api/get-project.js
 const { Octokit } = require("@octokit/rest");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -14,34 +13,37 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "Nombre del proyecto requerido" });
   }
 
-  const safeName = name.replace(/[^a-z0-9-_]/gi, "_").toLowerCase();
+  const safeName = name.trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s_-]/gi, "")
+    .replace(/\s+/g, "_")
+    .toLowerCase();
+
+  if (safeName === "") {
+    return res.status(400).json({ error: "Nombre no válido" });
+  }
+
   const projectPath = `${BASE_PATH}/${safeName}`;
 
   try {
-    // 1. Cargar info del proyecto
-    const { data: infoData } = await octokit.rest.repos.getContent({
+    const {  infoData } = await octokit.rest.repos.getContent({
       owner: OWNER,
       repo: REPO,
       path: `${projectPath}/info.json`,
     });
     const projectInfo = JSON.parse(Buffer.from(infoData.content, "base64").toString("utf8"));
 
-    // 2. Listar contenido de la carpeta del proyecto
-    const { data: files } = await octokit.rest.repos.getContent({
+    const {  files } = await octokit.rest.repos.getContent({
       owner: OWNER,
       repo: REPO,
       path: projectPath,
     });
 
-    // 3. Filtrar y cargar solo anotaciones (.json que empiecen con "anotacion_")
     const annotations = [];
     for (const file of files) {
-      if (
-        file.type === "file" &&
-        file.name.startsWith("anotacion_") &&
-        file.name.endsWith(".json")
-      ) {
-        const { data: annData } = await octokit.rest.repos.getContent({
+      if (file.name.startsWith("anotacion_") && file.name.endsWith(".json")) {
+        const {  annData } = await octokit.rest.repos.getContent({
           owner: OWNER,
           repo: REPO,
           path: file.path,
@@ -53,15 +55,21 @@ module.exports = async (req, res) => {
 
     res.status(200).json({
       name: projectInfo.name,
-      description: projectInfo.description,
+      description: projectInfo.description || '',
       imageData: projectInfo.imageData,
-      annotations,
+      annotations: annotations
     });
   } catch (error) {
-    console.error("Error en get-project:", error);
     if (error.status === 404) {
       return res.status(404).json({ error: "Proyecto no encontrado" });
     }
-    res.status(500).json({ error: "Error al cargar el proyecto" });
+    console.error("Error en get-project:", error);
+    let msg = "Error interno";
+    if (error.status === 403) {
+      msg = "Token sin permisos";
+    } else if (error.message) {
+      msg = error.message;
+    }
+    res.status(500).json({ error: msg });
   }
 };

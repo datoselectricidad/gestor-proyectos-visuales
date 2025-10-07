@@ -1,4 +1,3 @@
-// api/list-projects.js
 const { Octokit } = require("@octokit/rest");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -21,21 +20,18 @@ module.exports = async (req, res) => {
     });
 
     const projects = Array.isArray(data)
-      ? data
-          .filter(item => item.type === "dir")
-          .map(dir => ({
-            name: dir.name.replace(/_/g, " "),
-            encodedName: dir.name,
-          }))
+      ? data.filter(item => item.type === "dir").map(dir => ({
+          name: dir.name.replace(/_/g, " "),
+          encodedName: dir.name,
+        }))
       : [];
 
     res.status(200).json({ projects });
   } catch (error) {
-    // Manejo explícito de 404: carpeta 'proyectos' no existe
     if (error.status === 404) {
       return res.status(200).json({ projects: [] });
     }
     console.error("Error en list-projects:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    res.status(500).json({ error: "Error al listar proyectos" });
   }
 };

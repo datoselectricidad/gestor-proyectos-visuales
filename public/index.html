@@ -6,11 +6,7 @@
     <title>Gestor de Proyectos Visuales</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #74ebd5, #acb6e5);
@@ -33,14 +29,8 @@
             padding: 25px;
             text-align: center;
         }
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
+        h1 { font-size: 2.2rem; margin-bottom: 10px; }
+        .subtitle { font-size: 1.1rem; opacity: 0.9; }
         .button-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -90,18 +80,7 @@
             border-radius: 50%;
             margin-right: 8px;
         }
-        .status-ready {
-            background-color: #28a745;
-        }
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            min-height: 500px;
-        }
-        .document-view {
-            padding: 20px;
-            position: relative;
-        }
+        .status-ready { background-color: #28a745; }
         .image-container {
             position: relative;
             width: 100%;
@@ -163,24 +142,11 @@
             animation: slideIn 0.3s ease-out, slideOut 0.3s ease-out 2.7s;
             z-index: 1000;
         }
-        .notification.success {
-            background-color: #28a745;
-        }
-        .notification.error {
-            background-color: #dc3545;
-        }
-        .notification.warning {
-            background-color: #ffc107;
-            color: #333;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); }
-            to { transform: translateX(100%); }
-        }
+        .notification.success { background-color: #28a745; }
+        .notification.error { background-color: #dc3545; }
+        .notification.warning { background-color: #ffc107; color: #333; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
         .screen {
             display: none;
             animation: fadeIn 0.5s ease-in-out;
@@ -210,9 +176,7 @@
             background-color: #cccccc;
             cursor: not-allowed;
         }
-        button i {
-            margin-right: 8px;
-        }
+        button i { margin-right: 8px; }
         .form-group {
             margin-bottom: 15px;
         }
@@ -280,18 +244,10 @@
             gap: 10px;
             margin-top: 10px;
         }
-        .btn-delete {
-            background-color: #dc3545;
-        }
-        .btn-delete:hover {
-            background-color: #bd2130;
-        }
-        .btn-github {
-            background-color: #6f42c1;
-        }
-        .btn-github:hover {
-            background-color: #5a32a3;
-        }
+        .btn-delete { background-color: #dc3545; }
+        .btn-delete:hover { background-color: #bd2130; }
+        .btn-github { background-color: #6f42c1; }
+        .btn-github:hover { background-color: #5a32a3; }
     </style>
 </head>
 <body>
@@ -460,7 +416,7 @@
             }
         }
 
-        // === NUEVAS FUNCIONES PARA GITHUB ===
+        // === FUNCIONES PARA VERCEL ===
         async function saveProjectToGitHub() {
             if (!currentProject || !currentProject.name) {
                 showNotification('El proyecto debe tener un nombre', 'error');
@@ -479,6 +435,7 @@
                     annotations: currentProject.annotations || []
                 };
 
+                // ✅ Ruta para Vercel
                 const response = await fetch('/api/save-project', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -504,6 +461,7 @@
             const listDiv = document.getElementById('project-list');
             listDiv.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando...</p>';
             try {
+                // ✅ Ruta para Vercel
                 const response = await fetch('/api/list-projects');
                 const { projects } = await response.json();
                 if (projects.length === 0) {
@@ -527,6 +485,7 @@
 
         async function loadProjectFromGitHub(encodedName) {
             try {
+                // ✅ Ruta para Vercel
                 const response = await fetch(`/api/get-project?name=${encodeURIComponent(encodedName)}`);
                 const projectData = await response.json();
                 currentProject = {
@@ -534,24 +493,34 @@
                     name: encodedName.replace(/_/g, ' ')
                 };
                 document.getElementById('project-title').textContent = currentProject.name;
-                document.getElementById('project-image').src = currentProject.imageData;
-                showScreen('project-view-screen');
-                document.getElementById('project-image').onload = function() {
+
+                // ✅ CORREGIDO: onload ANTES de src
+                const img = document.getElementById('project-image');
+                img.onload = function() {
                     originalImageSize.width = this.naturalWidth;
                     originalImageSize.height = this.naturalHeight;
                     renderAnnotations();
                 };
+                img.onerror = function() {
+                    console.error("❌ Error al cargar imagen:", currentProject.imageData?.substring(0, 80));
+                    showNotification("No se pudo cargar la imagen", "error");
+                };
+                img.src = currentProject.imageData;
+
+                showScreen('project-view-screen');
                 showNotification('✅ Proyecto cargado', 'success');
             } catch (error) {
-                showNotification('❌ Error al cargar: ' + error.message, 'error');
+                console.error("Error al cargar proyecto:", error);
+                showNotification('❌ ' + (error.message || 'Error al cargar el proyecto'), 'error');
             }
         }
 
-        // === RESTO DE FUNCIONES (sin cambios esenciales) ===
         function renderAnnotations() {
             const overlay = document.getElementById('annotation-overlay');
             overlay.innerHTML = '';
-            if (!currentProject || !currentProject.annotations || currentProject.annotations.length === 0) return;
+            const annotations = currentProject?.annotations || [];
+            if (annotations.length === 0) return;
+
             const container = document.getElementById('image-container');
             const img = document.getElementById('project-image');
             if (!container || !img) return;
@@ -559,7 +528,7 @@
             const containerRect = container.getBoundingClientRect();
             const offsetX = (containerRect.width - imgRect.width) / 2;
             const offsetY = (containerRect.height - imgRect.height) / 2;
-            currentProject.annotations.forEach(annotation => {
+            annotations.forEach(annotation => {
                 const x = offsetX + (annotation.relativeX / originalImageSize.width) * imgRect.width;
                 const y = offsetY + (annotation.relativeY / originalImageSize.height) * imgRect.height;
                 if (isNaN(x) || isNaN(y)) return;
